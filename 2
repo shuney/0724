@@ -4,10 +4,9 @@ PRM: Primavera P6 Resource Manager
 Version: 1.0.0
 
 □ 패치노트:
-    - [디자인] 다크모드 메인 타이틀(Shimmer) 폰트 패밀리 동기화 및 Bold 유지.
-    - [디자인] 다크모드 메인 버튼(Export, Import, Save) 감성적인 파스텔 톤(Lavender, Peach, Mint)으로 색상 전면 개편.
-    - [디자인] DB Settings 창 drop() -> delete() 텍스트 변경.
-    - [디자인] DB Settings 창 add() 신택스 컬러를 VSC_ORANGE(주황색)로 변경.
+    - [디자인] 다크모드 서브타이틀(/* ~ */) 색상을 밝은 연두색으로 변경하여 시인성 확보.
+    - [디자인] 다크모드 메인 버튼(Export, Import, Save)을 신택스 폰트 컬러와 매칭되는 따뜻하고 밝은 파스텔톤(Orange, Yellow, Purple)으로 변경.
+    - [디자인] DB Settings 창 delete() 텍스트를 drop()으로 간소화하여 버튼 여백 최적화.
 """
 
 import os
@@ -81,7 +80,8 @@ C_FG = "#1D1D1F" if THEME == "light" else "#D4D4D4"
 C_SEC_FG = "#48484A" if THEME == "light" else "#D4D4D4"  
 C_BORDER = "#D1D1D6" if THEME == "light" else "#3C3C3C"
 
-C_SUBTITLE_FG = "#86868B" if THEME == "light" else "#6A9955" # Comment Green
+# [수정] 다크모드 서브타이틀(주석) 색상을 밝고 화사한 연두색(#89D185)으로 변경
+C_SUBTITLE_FG = "#86868B" if THEME == "light" else "#89D185" 
 C_THEME_FG = "#86868B" if THEME == "light" else "#4EC9B0" # Type Mint
 
 C_ACCENT = "#0071E3" if THEME == "light" else "#C586C0" # Control Purple
@@ -1040,9 +1040,9 @@ def open_db_settings(root):
         f_weight_btn = "normal"
         add_c = ("#4D4D4D", "#333333", "#DCDCAA", "#B5B58C", "#FFFFFF")
         del_c = ("#4D4D4D", "#333333", "#C586C0", "#9E6B99", "#FFFFFF")
-        # [수정] 다크모드 텍스트 변경(drop -> delete) 및 add 색상을 주황색(VSC_ORANGE)으로 변경
+        # [수정] add 버튼의 문구를 주황색(VSC_ORANGE)으로 변경, delete는 drop()으로 복구
         t_add = [("+ ", VSC_GRAY), ("add", VSC_ORANGE), ("(", VSC_BRACKET1), (")", VSC_BRACKET1)]
-        t_del = [("- ", VSC_GRAY), ("delete", VSC_PURPLE), ("(", VSC_BRACKET1), (")", VSC_BRACKET1)]
+        t_del = [("- ", VSC_GRAY), ("drop", VSC_PURPLE), ("(", VSC_BRACKET1), (")", VSC_BRACKET1)]
         
     create_diagonal_gradient_pill(cvs_ctrl, 5, 2, 60, 26, 3, add_c[0], add_c[1], add_c[2], add_c[3], t_add, add_c[4], on_add, f_weight=f_weight_btn)
     create_diagonal_gradient_pill(cvs_ctrl, 70, 2, 60, 26, 3, del_c[0], del_c[1], del_c[2], del_c[3], t_del, del_c[4], on_delete, f_size=8, f_weight=f_weight_btn)
@@ -1118,12 +1118,12 @@ def open_db_settings(root):
     canvas_save = tk.Canvas(frame_btns, width=340, height=65, bg=C_BG, highlightthickness=0)
     canvas_save.pack()
     
-    # [수정] Save 버튼 다크모드 파스텔 애플민트(Mint) 톤 적용
+    # [수정] Save 버튼 다크모드 따뜻한 파스텔 핑크/퍼플(VSC_PURPLE) 톤 적용
     if THEME == "light":
         c_save = ("#5E5CE6", "#4B49B7", "#7D7AFF", "#5A58D6")
         t_save = "Save & Apply Profile"
     else:
-        c_save = ("#32594D", "#252526", "#7ED3B2", "#234037") 
+        c_save = ("#6B4365", "#252526", VSC_PURPLE, "#4B2345") 
         t_save = [("await ", VSC_PURPLE), ("db", VSC_BLUE), (".", VSC_GRAY), ("commit", VSC_YELLOW), ("(", VSC_BRACKET1), (")", VSC_BRACKET1)]
         
     create_diagonal_gradient_button(canvas_save, 50, 10, 240, 45, 10, c_save[0], c_save[1], c_save[2], c_save[3], t_save, on_save, f_size=11 if THEME == "light" else 12)
@@ -1135,7 +1135,6 @@ def open_db_settings(root):
 anim_structures = {}
 
 def animate_text_shimmer_wave(window, canvas, full_text, font_size, center_x, center_y):
-    # [수정] 폰트는 C_FONT(Consolas 등)를 따르고 Bold로 고정하여 Shimmer 그라데이션이 두껍고 선명하게 보이도록 함
     f_obj = tkfont.Font(family=C_FONT, size=font_size, weight="bold")
     char_widths = [f_obj.measure(c) for c in full_text]
     total_w = sum(char_widths)
@@ -1251,17 +1250,17 @@ def main():
     canvas_main = tk.Canvas(root, width=460, height=150, bg=C_BG, highlightthickness=0)
     canvas_main.pack()
 
-    # [수정] 다크모드 메인 버튼: 파스텔 라벤더(Export) & 파스텔 피치/오렌지(Import) 전면 개편
+    # [수정] 다크모드 메인 버튼: 신택스 폰트 색감에 맞춘 따뜻하고 밝은 파스텔톤(Orange/Peach, Yellow) 전면 교체
     if THEME == "light":
         c_export = ("#47A1FF", "#0071E3", "#66B2FF", "#1A82F0")
         c_import = ("#3EE068", "#34C759", "#5CF282", "#41D868")
         t_exp = "Export Template"
         t_imp = "Import to DB"
     else:
-        # Export: Pastel Lavender Tone
-        c_export = ("#453C5C", C_BG, "#B497D6", "#322A45")
-        # Import: Pastel Peach/Coral Tone
-        c_import = ("#5C453C", C_BG, "#E3A587", "#45322A")
+        # Export: 파스텔 피치/오렌지 (VSC_ORANGE 톤 베이스)
+        c_export = ("#6B4B3D", C_BG, VSC_ORANGE, "#4B2B1D")
+        # Import: 파스텔 옐로우 (VSC_YELLOW 톤 베이스)
+        c_import = ("#6B643D", C_BG, VSC_YELLOW, "#4B441D")
         
         t_exp = [("export_template", VSC_YELLOW), ("(", VSC_BRACKET1), (")", VSC_BRACKET1)]
         t_imp = [("import_data_to_db", VSC_YELLOW), ("(", VSC_BRACKET1), (")", VSC_BRACKET1)]
