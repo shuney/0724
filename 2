@@ -4,10 +4,10 @@ PRM: Primavera P6 Resource Manager
 Version: 1.0.0
 
 □ 패치노트:
-    - [디자인] 다크 모드 메인 버튼 폰트 사이즈 상향.
-    - [디자인] 다크 모드 DB Settings 타이틀 간소화 (class 키워드 제거).
-    - [디자인] os.path.find(), db.ping() 내부 괄호 및 기호 독립 색상 하이라이팅 적용.
-    - [디자인] 다크 모드 캔버스 버튼 베이스 색상을 배경과 동일하게 페이드아웃시켜 유리(Glass) 투명도 극대화.
+    - [디자인] 다크 모드 구문(Syntax) 간격 최적화 (tk.Label 강제 여백 제거).
+    - [디자인] os.path.find() -> find() 로 간소화하여 UI 잘림 현상 해결.
+    - [디자인] DB Settings 창 Save 버튼 색상 톤업 및 시인성(Visibility) 복구.
+    - [디자인] 불필요한 띄어쓰기(space) 제거를 통해 에디터와 동일한 자연스러운 타이포그래피 구현.
 """
 
 import os
@@ -98,7 +98,7 @@ VSC_GRAY = "#858585"
 VSC_WHITE = "#D4D4D4"
 VSC_RED = "#F44747"
 
-# VS Code Bracket Pair Colorization (괄호 고유 색상)
+# VS Code Bracket Pair Colorization
 VSC_BRACKET1 = "#FFD700" # 1-Level: Yellow ()
 VSC_BRACKET2 = "#DA70D6" # 2-Level: Purple []
 VSC_BRACKET3 = "#179FFF" # 3-Level: Blue   {}
@@ -738,7 +738,7 @@ def create_diagonal_gradient_pill(canvas, x, y, w, h, radius, c_top, c_bot, h_to
         canvas.tag_bind(btn_tag, ev, handler)
 
 
-# 다중 색상 조합을 지원하는 하단 텍스트 버튼 생성기 (pack_side 지원 추가)
+# 다중 색상 텍스트 버튼 생성기 (bd=0, padx=0 속성을 추가하여 띄어쓰기 간격 문제 해결)
 def create_multicolor_label_button(parent_widget, parts, command, relx=None, rely=None, anchor=None, pack_side=None, pady=0, font_size=9, f_weight="normal"):
     f_wrapper = tk.Frame(parent_widget, bg=C_BG, cursor="hand2")
     if pack_side:
@@ -748,8 +748,9 @@ def create_multicolor_label_button(parent_widget, parts, command, relx=None, rel
     
     lbls = []
     for text, color in parts:
-        l = tk.Label(f_wrapper, text=text, font=(C_FONT, font_size, f_weight), bg=C_BG, fg=color)
-        l.pack(side="left", padx=0, pady=0)
+        # [수정] tk.Label 기본 여백(Padding/Border) 모두 0으로 설정하여 완벽한 밀착 구현
+        l = tk.Label(f_wrapper, text=text, font=(C_FONT, font_size, f_weight), bg=C_BG, fg=color, bd=0, padx=0, pady=0, highlightthickness=0)
+        l.pack(side="left", padx=0, pady=0, ipadx=0, ipady=0)
         lbls.append((l, color))
 
     def on_enter(e):
@@ -776,13 +777,14 @@ def create_modern_round_field(parent_frame, label_text, dark_syntax_parts=None, 
     lbl_frame = tk.Frame(f_container, bg=C_BG)
     lbl_frame.pack(fill="x", pady=(0, 2))
     
-    tk.Label(lbl_frame, text="▪", fg=C_ACCENT, font=(C_FONT, 7), bg=C_BG).pack(side="left", padx=(0, 3))
+    tk.Label(lbl_frame, text="▪", fg=C_ACCENT, font=(C_FONT, 7), bg=C_BG, bd=0, padx=0, pady=0, highlightthickness=0).pack(side="left", padx=(0, 3))
     
     if THEME == "light" or not dark_syntax_parts:
-        tk.Label(lbl_frame, text=label_text, foreground=C_SEC_FG, font=(C_FONT, 9, "bold"), bg=C_BG).pack(side="left", padx=0, pady=0)
+        tk.Label(lbl_frame, text=label_text, foreground=C_SEC_FG, font=(C_FONT, 9, "bold"), bg=C_BG, bd=0, padx=0, pady=0, highlightthickness=0).pack(side="left", padx=0, pady=0)
     else:
         for txt, color in dark_syntax_parts:
-            tk.Label(lbl_frame, text=txt, foreground=color, font=(C_FONT, 9, "normal"), bg=C_BG).pack(side="left", padx=0, pady=0)
+            # [수정] tk.Label 기본 여백 완전 제거 (밀착 렌더링)
+            tk.Label(lbl_frame, text=txt, foreground=color, font=(C_FONT, 9, "normal"), bg=C_BG, bd=0, padx=0, pady=0, highlightthickness=0).pack(side="left", padx=0, pady=0, ipadx=0, ipady=0)
     
     f_border = tk.Frame(f_container, bg=C_SEC_BG, highlightbackground=C_BORDER, highlightthickness=1, height=32)
     f_border.pack_propagate(False)
@@ -801,15 +803,15 @@ def create_modern_round_field(parent_frame, label_text, dark_syntax_parts=None, 
             btn_browse.pack(side="right", padx=10)
             btn_browse.bind("<Button-1>", lambda e: with_browse(ent))
         else:
-            # [수정] 다크 모드 os.path.find() 기호 및 괄호 분리 하이라이팅
             f_browse = tk.Frame(f_border, bg=C_SEC_BG, cursor="hand2")
             f_browse.pack(side="right", padx=10)
             
-            parts = [("os", VSC_BLUE), (".", VSC_GRAY), ("path", VSC_MINT), (".", VSC_GRAY), ("find", VSC_YELLOW), ("(", VSC_BRACKET1), (")", VSC_BRACKET1)]
+            # [수정] os.path.find() -> find() 로 간소화하여 UI 잘림 해결
+            parts = [("find", VSC_YELLOW), ("(", VSC_BRACKET1), (")", VSC_BRACKET1)]
             lbls = []
             for txt, col in parts:
-                l = tk.Label(f_browse, text=txt, font=(C_FONT, 9, "normal"), fg=col, bg=C_SEC_BG, cursor="hand2")
-                l.pack(side="left", padx=0, pady=0)
+                l = tk.Label(f_browse, text=txt, font=(C_FONT, 9, "normal"), fg=col, bg=C_SEC_BG, cursor="hand2", bd=0, padx=0, pady=0, highlightthickness=0)
+                l.pack(side="left", padx=0, pady=0, ipadx=0, ipady=0)
                 lbls.append((l, col))
             
             def on_br_enter(e):
@@ -883,7 +885,6 @@ def open_db_settings(root):
     sub_title_canvas = tk.Canvas(set_win, width=400, height=50, bg=C_BG, highlightthickness=0)
     sub_title_canvas.pack(pady=(20, 5))
     
-    # [수정] 메인 문구에서 class를 제거하여 직관적인 타이틀로 변경
     st_title = "DB Settings" if THEME == "light" else "DB_Settings"
     animate_text_shimmer_wave(set_win, sub_title_canvas, st_title, 22, 200, 25)
 
@@ -892,17 +893,15 @@ def open_db_settings(root):
 
     lbl_frame1 = tk.Frame(frame_inputs, bg=C_BG)
     lbl_frame1.pack(fill="x", pady=(0, 2), padx=0)
-    tk.Label(lbl_frame1, text="▪", fg=C_ACCENT, font=(C_FONT, 7), bg=C_BG).pack(side="left", padx=(0, 3))
+    tk.Label(lbl_frame1, text="▪", fg=C_ACCENT, font=(C_FONT, 7), bg=C_BG, bd=0, padx=0, pady=0, highlightthickness=0).pack(side="left", padx=(0, 3))
     
     if THEME == "light":
-        tk.Label(lbl_frame1, text="Connection Type", foreground=C_SEC_FG, font=(C_FONT, 9, "bold"), bg=C_BG).pack(side="left", padx=0, pady=0)
+        tk.Label(lbl_frame1, text="Connection Type", foreground=C_SEC_FG, font=(C_FONT, 9, "bold"), bg=C_BG, bd=0, padx=0, pady=0, highlightthickness=0).pack(side="left", padx=0, pady=0)
     else:
-        tk.Label(lbl_frame1, text="def ", foreground=VSC_BLUE, font=(C_FONT, 9), bg=C_BG).pack(side="left")
-        tk.Label(lbl_frame1, text="set_connection", foreground=VSC_YELLOW, font=(C_FONT, 9), bg=C_BG).pack(side="left")
-        tk.Label(lbl_frame1, text="(", foreground=VSC_BRACKET1, font=(C_FONT, 9), bg=C_BG).pack(side="left")
-        tk.Label(lbl_frame1, text=" type ", foreground=VSC_MINT, font=(C_FONT, 9), bg=C_BG).pack(side="left")
-        tk.Label(lbl_frame1, text=")", foreground=VSC_BRACKET1, font=(C_FONT, 9), bg=C_BG).pack(side="left")
-        tk.Label(lbl_frame1, text=":", foreground=VSC_GRAY, font=(C_FONT, 9), bg=C_BG).pack(side="left")
+        # [수정] 강제 여백 제거 및 불필요한 띄어쓰기 완벽 밀착
+        parts1 = [("def ", VSC_BLUE), ("set_connection", VSC_YELLOW), ("(", VSC_BRACKET1), ("type", VSC_MINT), (")", VSC_BRACKET1), (":", VSC_GRAY)]
+        for txt, col in parts1:
+            tk.Label(lbl_frame1, text=txt, foreground=col, font=(C_FONT, 9), bg=C_BG, bd=0, padx=0, pady=0, highlightthickness=0).pack(side="left", padx=0, pady=0, ipadx=0, ipady=0)
     
     f_cb1_border = tk.Frame(frame_inputs, bg=C_SEC_BG, highlightbackground=C_BORDER, highlightthickness=1, height=32)
     f_cb1_border.pack_propagate(False)
@@ -912,15 +911,14 @@ def open_db_settings(root):
     
     lbl_frame2 = tk.Frame(frame_inputs, bg=C_BG)
     lbl_frame2.pack(fill="x", pady=(0, 2), padx=0)
-    tk.Label(lbl_frame2, text="▪", fg=C_ACCENT, font=(C_FONT, 7), bg=C_BG).pack(side="left", padx=(0, 3))
+    tk.Label(lbl_frame2, text="▪", fg=C_ACCENT, font=(C_FONT, 7), bg=C_BG, bd=0, padx=0, pady=0, highlightthickness=0).pack(side="left", padx=(0, 3))
     
     if THEME == "light":
-        tk.Label(lbl_frame2, text="Select or Type Profile Name", bg=C_BG, fg=C_SEC_FG, font=(C_FONT, 9, "bold")).pack(side="left", padx=0, pady=0)
+        tk.Label(lbl_frame2, text="Select or Type Profile Name", bg=C_BG, fg=C_SEC_FG, font=(C_FONT, 9, "bold"), bd=0, padx=0, pady=0, highlightthickness=0).pack(side="left", padx=0, pady=0)
     else:
-        tk.Label(lbl_frame2, text="profile_name", foreground=VSC_YELLOW, font=(C_FONT, 9), bg=C_BG).pack(side="left")
-        tk.Label(lbl_frame2, text=" : ", foreground=VSC_GRAY, font=(C_FONT, 9), bg=C_BG).pack(side="left")
-        tk.Label(lbl_frame2, text="str", foreground=VSC_MINT, font=(C_FONT, 9), bg=C_BG).pack(side="left")
-        tk.Label(lbl_frame2, text=" =", foreground=VSC_GRAY, font=(C_FONT, 9), bg=C_BG).pack(side="left")
+        parts2 = [("profile_name", VSC_YELLOW), (" : ", VSC_GRAY), ("str", VSC_MINT), (" =", VSC_GRAY)]
+        for txt, col in parts2:
+            tk.Label(lbl_frame2, text=txt, foreground=col, font=(C_FONT, 9), bg=C_BG, bd=0, padx=0, pady=0, highlightthickness=0).pack(side="left", padx=0, pady=0, ipadx=0, ipady=0)
 
     frame_prof_ctrl = tk.Frame(frame_inputs, bg=C_BG)
     frame_prof_ctrl.pack(fill="x", pady=(0, 10), padx=(14, 0))
@@ -1079,10 +1077,36 @@ def open_db_settings(root):
         except Exception:
             messagebox.showerror("Failed", "Connection failed. Please verify your credentials.", parent=set_win)
 
+    def on_save():
+        prof_name = cb_profile.get().strip()
+        if not prof_name: return messagebox.showwarning("Warning", "Profile name cannot be empty.", parent=set_win)
+        
+        loaded_name = ui_state["loaded_profile"]
+        
+        if loaded_name and loaded_name != prof_name:
+            if prof_name in app_data["profiles"]:
+                return messagebox.showwarning("Warning", f"Profile '{prof_name}' already exists.", parent=set_win)
+            if loaded_name == "Default":
+                return messagebox.showwarning("Warning", "The Default profile cannot be renamed.", parent=set_win)
+            
+            app_data["profiles"][prof_name] = app_data["profiles"].pop(loaded_name)
+        
+        elif not loaded_name and prof_name in app_data["profiles"]:
+            if not messagebox.askyesno("Overwrite", f"Profile '{prof_name}' already exists. Do you want to overwrite it?", parent=set_win):
+                return
+
+        app_data["current_profile"] = prof_name
+        app_data["profiles"][prof_name] = {
+            "TYPE": cb_type.get(),
+            "HOST": ent_host.get(), "NAME": ent_name.get(), "USER": ent_user.get(), "PASS": ent_pwd.get()
+        }
+        save_config()
+        messagebox.showinfo("Saved", f"Profile '{prof_name}' saved and applied successfully.", parent=set_win)
+        set_win.destroy()
+
     frame_btns = tk.Frame(set_win, bg=C_BG)
     frame_btns.pack(pady=5)
     
-    # [수정] 다크모드 db.ping() 내부 괄호 색상 분리 및 다중 렌더링
     frame_test = tk.Frame(frame_btns, bg=C_BG)
     frame_test.pack(pady=4)
     
@@ -1098,13 +1122,12 @@ def open_db_settings(root):
     canvas_save = tk.Canvas(frame_btns, width=340, height=65, bg=C_BG, highlightthickness=0)
     canvas_save.pack()
     
-    # [수정] 다크모드 리퀴드(Glassmorphism) 반투명화 및 폰트 사이즈 키움
+    # [수정] 메인 버튼(Save) 사라짐 현상 복구: 베이스 색상을 모니터 환경에서도 보일 수 있도록 미세 톤업 (#252526)
     if THEME == "light":
         c_save = ("#5E5CE6", "#4B49B7", "#7D7AFF", "#5A58D6")
         t_save = "Save & Apply Profile"
     else:
-        # 베이스 색상(c_bot)을 C_BG(#1E1E1E)와 동일하게 주어 그라데이션이 자연스럽게 배경에 융화되게 함 (높은 투명도 효과)
-        c_save = ("#422A42", C_BG, VSC_PURPLE, "#422A42") 
+        c_save = ("#5A3D5A", "#252526", VSC_PURPLE, "#3A2A3A") 
         t_save = [("await ", VSC_PURPLE), ("db", VSC_BLUE), (".", VSC_GRAY), ("commit", VSC_YELLOW), ("(", VSC_BRACKET1), (")", VSC_BRACKET1)]
         
     create_diagonal_gradient_button(canvas_save, 50, 10, 240, 45, 10, c_save[0], c_save[1], c_save[2], c_save[3], t_save, on_save, f_size=11 if THEME == "light" else 12)
@@ -1231,14 +1254,12 @@ def main():
     canvas_main = tk.Canvas(root, width=460, height=150, bg=C_BG, highlightthickness=0)
     canvas_main.pack()
 
-    # [수정] 다크모드 메인 버튼 폰트사이즈 키움 (12) 및 배경색 기반 완전 투명도(Fade-out) 효과 적용
     if THEME == "light":
         c_export = ("#47A1FF", "#0071E3", "#66B2FF", "#1A82F0")
         c_import = ("#3EE068", "#34C759", "#5CF282", "#41D868")
         t_exp = "Export Template"
         t_imp = "Import to DB"
     else:
-        # 상단색을 매우 어두운 톤으로, 하단색을 C_BG(#1E1E1E)로 맞춰서 유리 테두리만 남는 높은 투명도 효과 연출
         c_export = ("#2D4558", C_BG, VSC_BLUE, "#2D4558")
         c_import = ("#274C44", C_BG, VSC_MINT, "#274C44")
         t_exp = [("export_template", VSC_YELLOW), ("(", VSC_BRACKET1), (")", VSC_BRACKET1)]
@@ -1247,12 +1268,13 @@ def main():
     create_diagonal_gradient_button(canvas_main, 120, 10, 220, 45, 10, c_export[0], c_export[1], c_export[2], c_export[3], t_exp, export_template, f_size=11 if THEME == "light" else 12)
     create_diagonal_gradient_button(canvas_main, 120, 75, 220, 45, 10, c_import[0], c_import[1], c_import[2], c_import[3], t_imp, lambda: import_data(root), f_size=11 if THEME == "light" else 12)
     
+    # [수정] 괄호 공백 모두 제거
     if THEME == "light":
         t_set = [("DB Settings", C_THEME_FG)]
         t_theme = [("Dark Mode", C_THEME_FG)]
     else:
-        t_set = [("{ ", VSC_BRACKET3), ("db_settings", VSC_WHITE), (" }", VSC_BRACKET3)]
-        t_theme = [("[ ", VSC_BRACKET2), ("toggle_theme", VSC_WHITE), (" ]", VSC_BRACKET2)]
+        t_set = [("{", VSC_BRACKET3), ("db_settings", VSC_WHITE), ("}", VSC_BRACKET3)]
+        t_theme = [("[", VSC_BRACKET2), ("toggle_theme", VSC_WHITE), ("]", VSC_BRACKET2)]
 
     create_multicolor_label_button(root, t_set, lambda: open_db_settings(root), relx=0.04, rely=0.96, anchor="sw", font_size=10, f_weight="bold" if THEME == "light" else "normal")
     create_multicolor_label_button(root, t_theme, lambda: toggle_theme(root), relx=0.96, rely=0.96, anchor="se", font_size=10, f_weight="bold" if THEME == "light" else "normal")
