@@ -4,10 +4,10 @@ PRM: Primavera P6 Resource Manager
 Version: 1.0.0
 
 □ 패치노트:
-    - [디자인] 다크 모드 구문(Syntax) 간격 최적화 (tk.Label 강제 여백 제거).
-    - [디자인] os.path.find() -> find() 로 간소화하여 UI 잘림 현상 해결.
-    - [디자인] DB Settings 창 Save 버튼 색상 톤업 및 시인성(Visibility) 복구.
-    - [디자인] 불필요한 띄어쓰기(space) 제거를 통해 에디터와 동일한 자연스러운 타이포그래피 구현.
+    - [디자인] 다크모드 메인 타이틀(Shimmer) 폰트 패밀리 동기화 및 Bold 유지.
+    - [디자인] 다크모드 메인 버튼(Export, Import, Save) 감성적인 파스텔 톤(Lavender, Peach, Mint)으로 색상 전면 개편.
+    - [디자인] DB Settings 창 drop() -> delete() 텍스트 변경.
+    - [디자인] DB Settings 창 add() 신택스 컬러를 VSC_ORANGE(주황색)로 변경.
 """
 
 import os
@@ -738,7 +738,6 @@ def create_diagonal_gradient_pill(canvas, x, y, w, h, radius, c_top, c_bot, h_to
         canvas.tag_bind(btn_tag, ev, handler)
 
 
-# 다중 색상 텍스트 버튼 생성기 (bd=0, padx=0 속성을 추가하여 띄어쓰기 간격 문제 해결)
 def create_multicolor_label_button(parent_widget, parts, command, relx=None, rely=None, anchor=None, pack_side=None, pady=0, font_size=9, f_weight="normal"):
     f_wrapper = tk.Frame(parent_widget, bg=C_BG, cursor="hand2")
     if pack_side:
@@ -748,7 +747,6 @@ def create_multicolor_label_button(parent_widget, parts, command, relx=None, rel
     
     lbls = []
     for text, color in parts:
-        # [수정] tk.Label 기본 여백(Padding/Border) 모두 0으로 설정하여 완벽한 밀착 구현
         l = tk.Label(f_wrapper, text=text, font=(C_FONT, font_size, f_weight), bg=C_BG, fg=color, bd=0, padx=0, pady=0, highlightthickness=0)
         l.pack(side="left", padx=0, pady=0, ipadx=0, ipady=0)
         lbls.append((l, color))
@@ -783,7 +781,6 @@ def create_modern_round_field(parent_frame, label_text, dark_syntax_parts=None, 
         tk.Label(lbl_frame, text=label_text, foreground=C_SEC_FG, font=(C_FONT, 9, "bold"), bg=C_BG, bd=0, padx=0, pady=0, highlightthickness=0).pack(side="left", padx=0, pady=0)
     else:
         for txt, color in dark_syntax_parts:
-            # [수정] tk.Label 기본 여백 완전 제거 (밀착 렌더링)
             tk.Label(lbl_frame, text=txt, foreground=color, font=(C_FONT, 9, "normal"), bg=C_BG, bd=0, padx=0, pady=0, highlightthickness=0).pack(side="left", padx=0, pady=0, ipadx=0, ipady=0)
     
     f_border = tk.Frame(f_container, bg=C_SEC_BG, highlightbackground=C_BORDER, highlightthickness=1, height=32)
@@ -806,7 +803,6 @@ def create_modern_round_field(parent_frame, label_text, dark_syntax_parts=None, 
             f_browse = tk.Frame(f_border, bg=C_SEC_BG, cursor="hand2")
             f_browse.pack(side="right", padx=10)
             
-            # [수정] os.path.find() -> find() 로 간소화하여 UI 잘림 해결
             parts = [("find", VSC_YELLOW), ("(", VSC_BRACKET1), (")", VSC_BRACKET1)]
             lbls = []
             for txt, col in parts:
@@ -898,7 +894,6 @@ def open_db_settings(root):
     if THEME == "light":
         tk.Label(lbl_frame1, text="Connection Type", foreground=C_SEC_FG, font=(C_FONT, 9, "bold"), bg=C_BG, bd=0, padx=0, pady=0, highlightthickness=0).pack(side="left", padx=0, pady=0)
     else:
-        # [수정] 강제 여백 제거 및 불필요한 띄어쓰기 완벽 밀착
         parts1 = [("def ", VSC_BLUE), ("set_connection", VSC_YELLOW), ("(", VSC_BRACKET1), ("type", VSC_MINT), (")", VSC_BRACKET1), (":", VSC_GRAY)]
         for txt, col in parts1:
             tk.Label(lbl_frame1, text=txt, foreground=col, font=(C_FONT, 9), bg=C_BG, bd=0, padx=0, pady=0, highlightthickness=0).pack(side="left", padx=0, pady=0, ipadx=0, ipady=0)
@@ -1045,8 +1040,9 @@ def open_db_settings(root):
         f_weight_btn = "normal"
         add_c = ("#4D4D4D", "#333333", "#DCDCAA", "#B5B58C", "#FFFFFF")
         del_c = ("#4D4D4D", "#333333", "#C586C0", "#9E6B99", "#FFFFFF")
-        t_add = [("+ ", VSC_GRAY), ("add", VSC_YELLOW), ("(", VSC_BRACKET1), (")", VSC_BRACKET1)]
-        t_del = [("- ", VSC_GRAY), ("drop", VSC_PURPLE), ("(", VSC_BRACKET1), (")", VSC_BRACKET1)]
+        # [수정] 다크모드 텍스트 변경(drop -> delete) 및 add 색상을 주황색(VSC_ORANGE)으로 변경
+        t_add = [("+ ", VSC_GRAY), ("add", VSC_ORANGE), ("(", VSC_BRACKET1), (")", VSC_BRACKET1)]
+        t_del = [("- ", VSC_GRAY), ("delete", VSC_PURPLE), ("(", VSC_BRACKET1), (")", VSC_BRACKET1)]
         
     create_diagonal_gradient_pill(cvs_ctrl, 5, 2, 60, 26, 3, add_c[0], add_c[1], add_c[2], add_c[3], t_add, add_c[4], on_add, f_weight=f_weight_btn)
     create_diagonal_gradient_pill(cvs_ctrl, 70, 2, 60, 26, 3, del_c[0], del_c[1], del_c[2], del_c[3], t_del, del_c[4], on_delete, f_size=8, f_weight=f_weight_btn)
@@ -1122,12 +1118,12 @@ def open_db_settings(root):
     canvas_save = tk.Canvas(frame_btns, width=340, height=65, bg=C_BG, highlightthickness=0)
     canvas_save.pack()
     
-    # [수정] 메인 버튼(Save) 사라짐 현상 복구: 베이스 색상을 모니터 환경에서도 보일 수 있도록 미세 톤업 (#252526)
+    # [수정] Save 버튼 다크모드 파스텔 애플민트(Mint) 톤 적용
     if THEME == "light":
         c_save = ("#5E5CE6", "#4B49B7", "#7D7AFF", "#5A58D6")
         t_save = "Save & Apply Profile"
     else:
-        c_save = ("#5A3D5A", "#252526", VSC_PURPLE, "#3A2A3A") 
+        c_save = ("#32594D", "#252526", "#7ED3B2", "#234037") 
         t_save = [("await ", VSC_PURPLE), ("db", VSC_BLUE), (".", VSC_GRAY), ("commit", VSC_YELLOW), ("(", VSC_BRACKET1), (")", VSC_BRACKET1)]
         
     create_diagonal_gradient_button(canvas_save, 50, 10, 240, 45, 10, c_save[0], c_save[1], c_save[2], c_save[3], t_save, on_save, f_size=11 if THEME == "light" else 12)
@@ -1139,6 +1135,7 @@ def open_db_settings(root):
 anim_structures = {}
 
 def animate_text_shimmer_wave(window, canvas, full_text, font_size, center_x, center_y):
+    # [수정] 폰트는 C_FONT(Consolas 등)를 따르고 Bold로 고정하여 Shimmer 그라데이션이 두껍고 선명하게 보이도록 함
     f_obj = tkfont.Font(family=C_FONT, size=font_size, weight="bold")
     char_widths = [f_obj.measure(c) for c in full_text]
     total_w = sum(char_widths)
@@ -1254,21 +1251,24 @@ def main():
     canvas_main = tk.Canvas(root, width=460, height=150, bg=C_BG, highlightthickness=0)
     canvas_main.pack()
 
+    # [수정] 다크모드 메인 버튼: 파스텔 라벤더(Export) & 파스텔 피치/오렌지(Import) 전면 개편
     if THEME == "light":
         c_export = ("#47A1FF", "#0071E3", "#66B2FF", "#1A82F0")
         c_import = ("#3EE068", "#34C759", "#5CF282", "#41D868")
         t_exp = "Export Template"
         t_imp = "Import to DB"
     else:
-        c_export = ("#2D4558", C_BG, VSC_BLUE, "#2D4558")
-        c_import = ("#274C44", C_BG, VSC_MINT, "#274C44")
+        # Export: Pastel Lavender Tone
+        c_export = ("#453C5C", C_BG, "#B497D6", "#322A45")
+        # Import: Pastel Peach/Coral Tone
+        c_import = ("#5C453C", C_BG, "#E3A587", "#45322A")
+        
         t_exp = [("export_template", VSC_YELLOW), ("(", VSC_BRACKET1), (")", VSC_BRACKET1)]
         t_imp = [("import_data_to_db", VSC_YELLOW), ("(", VSC_BRACKET1), (")", VSC_BRACKET1)]
 
     create_diagonal_gradient_button(canvas_main, 120, 10, 220, 45, 10, c_export[0], c_export[1], c_export[2], c_export[3], t_exp, export_template, f_size=11 if THEME == "light" else 12)
     create_diagonal_gradient_button(canvas_main, 120, 75, 220, 45, 10, c_import[0], c_import[1], c_import[2], c_import[3], t_imp, lambda: import_data(root), f_size=11 if THEME == "light" else 12)
     
-    # [수정] 괄호 공백 모두 제거
     if THEME == "light":
         t_set = [("DB Settings", C_THEME_FG)]
         t_theme = [("Dark Mode", C_THEME_FG)]
